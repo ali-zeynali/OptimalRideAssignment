@@ -51,7 +51,7 @@ class DataGenerator:
 
     def generate_synthetic_dataset(self, number_of_requests, number_of_drivers, request_intervals, avg_trip_distance,
                                   lat_range, long_range, unit_emission_range,avg_speed, dist_of_unit_emission='exp'):
-        np.random.seed(42)
+        # np.random.seed(42)
         time = datetime(2020, 1, 1, 0, 0, 0, 0)
         requests = []
         for i in range(number_of_requests):
@@ -75,7 +75,7 @@ class DataGenerator:
         drivers = []
         for i in range(number_of_drivers):
             if dist_of_unit_emission == 'exp':
-                unit_emission = self.custom_exponential_sample(2, unit_emission_range[0], unit_emission_range[1])
+                unit_emission = self.custom_exponential_sample(1, unit_emission_range[0], unit_emission_range[1])
             else:
                 unit_emission = np.random.uniform(unit_emission_range[0], unit_emission_range[1])
 

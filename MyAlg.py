@@ -4,7 +4,8 @@ import numpy as np
 class MyAlg(Algorithm):
     pass
 
-    def calculate_limit(self):
+    def calculate_limit(self, driver_move_range=[0, 0]):
+        super().__init__(driver_move_range=driver_move_range)
         pass
 
     def findDriver(self, request, drivers, time, params=None):
