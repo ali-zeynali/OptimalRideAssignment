@@ -1,1 +1,1 @@
-{"avg_emission": 3141.3795698447702, "avg_waiting": 1268.1654, "avg_deadhead": 12.343756666681493, "min_deadhead": 0.08987918059550848, "max_deadhead": 60.53042345071612, "avg_tripdistance": 14.986055605279946, "n_requests": 5000, "serving_time": 63963}
+{"avg_emission": 3921.1693127593294, "avg_waiting": 902.1446, "avg_deadhead": 8.276883963879325, "min_deadhead": 0.16238813219955836, "max_deadhead": 31.097256677192174, "avg_tripdistance": 14.986055605279946, "n_requests": 5000, "serving_time": 63963}

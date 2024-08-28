@@ -1,5 +1,6 @@
 from DataGenerator import *
 from FixedLimit_Alg import *
+from MyAlg import *
 import json
 from datetime import datetime, timedelta
 import numpy as np
@@ -21,7 +22,12 @@ driver_move_range = [0.01, 0.01]
 data_generator.generate_synthetic_dataset(number_of_requests, number_of_drivers, request_intervals, avg_trip_distance,
                                   lat_range, long_range, unit_emission_range, avg_speed, dist_of_unit_emission='exp')
 
-algorithm = FixedLimit_Alg(driver_move_range= driver_move_range, distance_limit=distance_limit)
+# algorithm = FixedLimit_Alg(driver_move_range= driver_move_range, distance_limit=distance_limit)
+
+
+distance_options = [1, 2, 5, 10, 15]
+algorithm = MyAlg(driver_move_range=driver_move_range, distance_options= distance_options, lr=0.1)
+initial_utilities = algorithm.utility_function.copy()
 
 batch_index = 0
 while True:
@@ -35,12 +41,19 @@ while True:
     batch_index += 1
 
     for request in requests:
-        driver = algorithm.findDriver(request, drivers, time)
+        params = {'update':True} # parameter of myAlg
+
+        driver = algorithm.findDriver(request, drivers, time, params=params)
         if driver is not None:
             # print(f"Request id: {request.ride_request_id} assigned to driver {driver.driver_id}")
             algorithm.finalize_match(request, driver, time)
             drivers.remove(driver)
             data_generator.next()
+
+print(f"Algorithm distance options: {algorithm.distance_options}")
+print(f"Initial Utilities: {initial_utilities}")
+print(f"Utilities: {algorithm.utility_function}")
+exit(0)
 
 
 requests = data_generator.get_all_requests()
