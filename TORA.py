@@ -37,7 +37,7 @@ class TORA(Algorithm):
         if waiting_times[bestCarIndex] == 0:
             return drivers[bestDriverIndex]
 
-        distance_diff = (waiting_times - waiting_times[bestCarIndex]) * driver.avg_speed
+        distance_diff = (waiting_times - waiting_times[bestCarIndex]) * drivers[bestCarIndex].avg_speed
 
         for i in range(len(distance_diff)):
             if distance_diff[i] == 0:
