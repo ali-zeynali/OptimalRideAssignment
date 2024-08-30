@@ -4,7 +4,7 @@ from geopy.distance import great_circle
 
 
 class Request:
-    def __init__(self, ride_request_id, created_request_time, pickup_lat, pickup_long, dropoff_lat, dropoff_long):
+    def __init__(self, ride_request_id, created_request_time, pickup_lat, pickup_long, dropoff_lat, dropoff_long, unassigned_tol=3):
         self.ride_request_id = int(ride_request_id)
         self.created_request_time = self.string_to_time(created_request_time) if isinstance(created_request_time, str) else created_request_time
         self.pickup_lat = float(pickup_lat)
@@ -18,6 +18,8 @@ class Request:
         self.time_in_batch = 0
         self.waiting_time = 0
         self.matched_driver = None
+        self.unassigned_tol = unassigned_tol
+        self.unassigned_count = 0
 
     def string_to_time(self, timestamp):
         time1 = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S%z")

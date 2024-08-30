@@ -12,6 +12,9 @@ class Algorithm:
         distance = great_circle(point1, point2).km
         return distance
 
+    def reset(self):
+        return
+
     def findDriver(self, request, drivers, time, params=None):
         return None
 
