@@ -12,7 +12,7 @@ data_path = "results/Dataset_batchDuration/"
 algorithms = [ "MyAlg-0.25","MyAlg-0.50","MyAlg-0.75", "TORA", "CD"]
 
 result = {}
-do_refinement = False
+do_refinement = True
 for alg in algorithms:
     data =read_data(data_path + f"Texas_{alg}.json")
 
