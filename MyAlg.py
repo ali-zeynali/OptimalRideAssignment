@@ -2,30 +2,35 @@ from Algorithm import *
 
 
 class MyAlg(Algorithm):
-    def __init__(self, driver_move_range, distance_options, max_waiting_list, gamma, V_coeff, lr=0.1):
+    def __init__(self, driver_move_range, distance_options, max_waiting_list, alpha, V_coeff, lr=0.1):
         super().__init__(driver_move_range=driver_move_range)
         self.distance_options = distance_options
         self.M = len(self.distance_options)
-        self.utility_function = [np.log2(v / distance_options[0]) for v in distance_options]
         self.max_waiting_list = max_waiting_list
-        self.gamma = gamma
+        self.alpha = alpha
         self.V_coeff = V_coeff
-        self.d0 = 10 #initialized value = 10 km
+        # self.utility_function = [np.log2(v / distance_options[0]) for v in distance_options]
+        # self.d0 = 0 #initialized value = 10 km
         self.lr = lr
+        self.reset()
 
     def reset(self):
-        self.d0 = 10
+        self.d0 = 0
         self.utility_function = [np.log2(v / self.distance_options[0]) for v in self.distance_options]
 
-    def calculate_limit(self, n_assigned_requests, unassigned_requests):
+    def normal_utilities(self):
+        return [(v - self.utility_function[0]) / (self.utility_function[-1] - self.utility_function[0]) for v in self.utility_function]
+
+    def calculate_limit(self, unassigned_requests):
         max_phi = 0
         distance_limit = self.distance_options[-1]
         Q = self.max_waiting_list - unassigned_requests
 
-        V = self.V_coeff * (self.max_waiting_list - n_assigned_requests) * n_assigned_requests / (
-                    n_assigned_requests + self.gamma * self.utility_function[-1])
+        utilities = self.normal_utilities()
+        V = self.V_coeff * (self.max_waiting_list)  / (
+                1 - self.alpha + (self.alpha) * utilities[-1])
         for idx, d in enumerate(self.distance_options):
-            phi = (n_assigned_requests + self.gamma * self.utility_function[idx]) * V - Q * n_assigned_requests
+            phi = (1 - self.alpha + (self.alpha) * utilities[idx]) * V - Q
             phi /= (d + self.d0)
             if phi > max_phi:
                 max_phi = phi
@@ -36,18 +41,15 @@ class MyAlg(Algorithm):
         sorted_indices = sorted(range(len(arr)), key=lambda x: arr[x])
         return sorted_indices
 
-    def findDriver(self, request, drivers, time, params=None):
+    def algorithm_matcher(self, request, drivers, time, params=None):
         if len(drivers) == 0:
             return None
 
-        distance_limit = self.calculate_limit(n_assigned_requests=params['n_assigning'],
-                                              unassigned_requests=params['n_unassigned'])
+        distance_limit = self.calculate_limit(unassigned_requests=params['n_unassigned'])
 
-        if request.ride_request_id == 44:
-            temp = 2
         distances = []
         emissions = []
-        self.d0 = self.d0 * (1- self.lr) + self.lr * request.trip_distance
+        # self.d0 = self.d0 * (1- self.lr) + self.lr * request.trip_distance
         for driver in drivers:
             distance = self.calculate_distance(driver.curloc_lat, driver.curloc_long, request.pickup_lat,
                                                request.pickup_long)

@@ -8,7 +8,7 @@ class TORA(Algorithm):
         self.base_ev_emission = base_ev_emission
         self.threshold = threshold
 
-    def findDriver(self, request, drivers, time, params=None):
+    def algorithm_matcher(self, request, drivers, time, params=None):
         distances = []
         unit_emissions = []
         driver_index = []

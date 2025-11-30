@@ -4,6 +4,7 @@ from Request import *
 from Driver import *
 import pandas as pd
 import random
+from tqdm import tqdm
 
 class DataGenerator:
     def __init__(self):
@@ -61,7 +62,7 @@ class DataGenerator:
     def generate_synthetic_dataset(self, number_of_requests, number_of_drivers, request_intervals, avg_trip_distance,
                                   lat_range, long_range, unit_emission_range, avg_speed, unassigned_tol,
                                    dist_of_unit_emission='exp', random_gen_version=1):
-        np.random.seed(42)
+        # np.random.seed(42)
         time = datetime(2020, 1, 1, 0, 0, 0, 0)
         requests = []
         self.avg_intervals = request_intervals
@@ -102,7 +103,7 @@ class DataGenerator:
         self.number_of_requests = number_of_requests
 
     def read_dataset(self, path, number_of_drivers, avg_speed, unassigned_tol, lat_range, long_range, request_periods,
-                     avg_trip_distance, unit_emission_range=None):
+                     avg_trip_distance, unit_emission_range=None, update_all=False):
         data = pd.read_csv(path)
         data.sort_values(by='created_date', inplace=True)
         request_list = []
@@ -112,7 +113,7 @@ class DataGenerator:
             pickup_long = float(row[14])
             dropoff_lat = float(row[5])
             dropoff_long = float(row[6])
-            pickup_updated = False
+            pickup_updated = update_all
             if pickup_lat < lat_range[0] or pickup_lat > lat_range[1]:
                 pickup_lat = np.random.uniform(lat_range[0], lat_range[1])
                 pickup_updated = True
@@ -152,7 +153,9 @@ class DataGenerator:
                 unit_emission = float(row[43])  # Default emission value
             else:
                 # unit_emission = self.custom_exponential_sample(2, unit_emission_range[0], unit_emission_range[1])
-                unit_emission = self.custom_exponential_sample(0.3, unit_emission_range[0], unit_emission_range[1])
+                # unit_emission = self.custom_exponential_sample(0.3, unit_emission_range[0], unit_emission_range[1])
+                unit_emission = self.custom_exponential_sample(2, unit_emission_range[0], unit_emission_range[1],
+                                                               version=0) # for motivation
             driver_lat = np.random.uniform(lat_range[0], lat_range[1])
             driver_long = np.random.uniform(long_range[0], long_range[1])
             driver = Driver(idx, unit_emission, avg_speed, driver_lat=driver_lat, driver_long=driver_long)
@@ -162,6 +165,72 @@ class DataGenerator:
         self.drivers = drivers_list
         self.number_of_requests = len(request_list)
 
+    def read_texas_dataset(self, path, number_of_drivers, avg_speed, unassigned_tol, lat_range, long_range, request_periods,
+                     avg_trip_distance, unit_emission_range=None, update_all=False):
+        data = pd.read_csv(path)
+
+        data['time'] = pd.to_datetime(data['Trip Start Timestamp'])
+        random_seconds = np.random.randint(0, 15 * 60 + 1, size=len(data))
+        # Add the random timedelta to the 'time' column
+        data['time'] = data['time'] + pd.to_timedelta(random_seconds, unit='s')
+        data.sort_values(by='time', inplace=True)
+        request_list = []
+        intervals = []
+        for index, row in tqdm(data.iterrows(), total=len(data), desc="Loading dataset"):
+            pickup_lat = float(row[17])
+            pickup_long = float(row[18])
+            dropoff_lat = float(row[20])
+            dropoff_long = float(row[21])
+            pickup_updated = update_all
+            if pickup_lat < lat_range[0] or pickup_lat > lat_range[1]:
+                pickup_lat = np.random.uniform(lat_range[0], lat_range[1])
+                pickup_updated = True
+            if pickup_long < long_range[0] or pickup_long > long_range[1]:
+                pickup_long = np.random.uniform(long_range[0], long_range[1])
+                pickup_updated = True
+
+            # if dropoff_lat < lat_range[0] or dropoff_lat > lat_range[1]:
+            #     dropoff_lat = np.random.uniform(lat_range[0], lat_range[1])
+            # if dropoff_long < long_range[0] or dropoff_long > long_range[1]:
+            #     dropoff_long = np.random.uniform(long_range[0], long_range[1])
+            if pickup_updated:
+                bearing = float(np.random.uniform(0, 360))
+                trip_distance = np.random.normal(avg_trip_distance, 2, 1)[0]
+                dropoff_lat, dropoff_long = self.haversine_destination(pickup_lat, pickup_long, trip_distance, bearing)
+
+            request = Request(index, row[28], pickup_lat, pickup_long, dropoff_lat, dropoff_long,
+                              unassigned_tol=unassigned_tol)
+            if request.created_request_time < request_periods[0] or request.created_request_time > request_periods[1]:
+                continue
+
+            if len(request_list) > 0:
+                interval = request.created_request_time - request_list[-1].created_request_time
+                interval = interval.seconds
+                if interval < 5 * 60:  # 5 minutes
+                    intervals.append(interval)
+            request_list.append(request)
+
+        self.avg_intervals = np.average(intervals)
+
+        driver_indexes = random.sample(range(len(data)), number_of_drivers)
+        drivers_list = []
+        for idx in driver_indexes:
+            row = data.iloc[idx]
+            if unit_emission_range is None:
+                unit_emission = float(row[27])  # Default emission value
+            else:
+                # unit_emission = self.custom_exponential_sample(2, unit_emission_range[0], unit_emission_range[1])
+                # unit_emission = self.custom_exponential_sample(0.3, unit_emission_range[0], unit_emission_range[1])
+                unit_emission = self.custom_exponential_sample(2, unit_emission_range[0], unit_emission_range[1],
+                                                               version=0)  # for motivation
+            driver_lat = np.random.uniform(lat_range[0], lat_range[1])
+            driver_long = np.random.uniform(long_range[0], long_range[1])
+            driver = Driver(idx, unit_emission, avg_speed, driver_lat=driver_lat, driver_long=driver_long)
+            drivers_list.append(driver)
+
+        self.requests = request_list
+        self.drivers = drivers_list
+        self.number_of_requests = len(request_list)
 
     def next_batch(self, interval_time):
         if self.head_index >= self.number_of_requests:
@@ -176,7 +245,7 @@ class DataGenerator:
         if self.curr_time is None:
             self.curr_time = self.requests[self.head_index].created_request_time
 
-        if self.curr_time < self.requests[self.head_index].created_request_time:
+        if self.curr_time < self.requests[self.head_index].created_request_time and len(batch_requests) == 0:
             self.curr_time = self.requests[self.head_index].created_request_time
 
         end_time = self.curr_time + interval_time

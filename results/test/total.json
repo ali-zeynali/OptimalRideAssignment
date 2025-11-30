@@ -1,12 +1,44 @@
 {
-  "avg_emission": 5123.8697808989,
-  "avg_waiting": 3703.0112,
-  "avg_deadhead": 27.647785497383342,
-  "min_deadhead": 0.19391109696050027,
-  "max_deadhead": 138.1397771185558,
-  "avg_tripdistance": 14.981955855460505,
-  "n_requests": 5000,
-  "n_unassignment": 665,
-  "serving_time": 67263,
-  "avg_req_intervals": 30
+  "TORA": {
+    "avg_emission": 2820.5522967199927,
+    "avg_waiting": 2636.660631649462,
+    "avg_deadhead": 8.918331620267901,
+    "min_deadhead": 0.07226756133284636,
+    "max_deadhead": 83.14725536749847,
+    "min_waiting": 6.5040805199561715,
+    "max_waiting": 7483.252983074863,
+    "avg_tripdistance": 6.022606386793072,
+    "n_requests": 2909,
+    "n_unassignment": 313,
+    "serving_time": 89583.0,
+    "avg_req_intervals": 28.075940628236108
+  },
+  "MyAlg": {
+    "avg_emission": 2798.597316870557,
+    "avg_waiting": 2129.541613580103,
+    "avg_deadhead": 7.863710403784421,
+    "min_deadhead": 0.07421871412320666,
+    "max_deadhead": 106.04703871992379,
+    "min_waiting": 6.679684271088599,
+    "max_waiting": 9544.233484793142,
+    "avg_tripdistance": 6.0865930615139945,
+    "n_requests": 2909,
+    "n_unassignment": 356,
+    "serving_time": 89641.0,
+    "avg_req_intervals": 28.075940628236108
+  },
+  "CD": {
+    "avg_emission": 2974.9768949015393,
+    "avg_waiting": 2455.946439513513,
+    "avg_deadhead": 8.915132039153239,
+    "min_deadhead": 0.14940501150203236,
+    "max_deadhead": 91.54546678724365,
+    "min_waiting": 13.446451035182912,
+    "max_waiting": 8239.09201085193,
+    "avg_tripdistance": 6.028384641403704,
+    "n_requests": 2909,
+    "n_unassignment": 319,
+    "serving_time": 89623.0,
+    "avg_req_intervals": 28.075940628236108
+  }
 }
